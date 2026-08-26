@@ -124,5 +124,14 @@
     "email": "vercel@test.com",
     "passwordHash": "b6bb79b28eea89aa1ccb9880cedfd941:8d344ed2550872264107dbd5c109b3455d9675d760c135e978dbcd70ddab52aecfe5dd4aa5203ad2ac671ed6b1c1bf895000e569ce6e05a825802519af951845",
     "role": "entrepreneur"
+  },
+  {
+    "id": "mtabnkqvh4yexae1",
+    "createdAt": "2026-08-26T16:42:15.367Z",
+    "name": "Vercel Test",
+    "phone": "9999888888",
+    "email": "",
+    "passwordHash": "74cf817d4a189cea776064dc1223963a:b8c6d959996368b433b23625281f48d2b334448730ebb8821670bb05b9e7b84ca8f3237b8c53c27bf92c74f68c24dab20d5c372a1c291a0bf40f92780904aeba",
+    "role": "entrepreneur"
   }
 ]

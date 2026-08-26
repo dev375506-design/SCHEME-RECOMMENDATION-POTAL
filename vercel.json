@@ -2,33 +2,21 @@
   "version": 2,
   "rewrites": [
     {
-      "source": "/api/(.*)",
+      "source": "/api/:path*",
       "destination": "/api"
     },
     {
-      "source": "/(.*).html",
-      "destination": "/client/public/$1.html"
-    },
-    {
-      "source": "/css/(.*)",
-      "destination": "/client/public/css/$1"
-    },
-    {
-      "source": "/js/(.*)",
-      "destination": "/client/public/js/$1"
-    },
-    {
-      "source": "/img/(.*)",
-      "destination": "/client/public/img/$1"
-    },
-    {
-      "source": "/$",
+      "source": "/",
       "destination": "/client/public/index.html"
+    },
+    {
+      "source": "/:path*",
+      "destination": "/client/public/:path*"
     }
   ],
   "headers": [
     {
-      "source": "/api/(.*)",
+      "source": "/api/:path*",
       "headers": [
         {
           "key": "Cache-Control",
@@ -37,7 +25,7 @@
       ]
     },
     {
-      "source": "/css/(.*)",
+      "source": "/css/:path*",
       "headers": [
         {
           "key": "Cache-Control",
@@ -46,7 +34,7 @@
       ]
     },
     {
-      "source": "/js/(.*)",
+      "source": "/js/:path*",
       "headers": [
         {
           "key": "Cache-Control",
@@ -55,7 +43,7 @@
       ]
     },
     {
-      "source": "/img/(.*)",
+      "source": "/img/:path*",
       "headers": [
         {
           "key": "Cache-Control",

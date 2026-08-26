@@ -1,0 +1,13 @@
+{
+  "name": "scheme-recommendation-portal",
+  "version": "1.0.0",
+  "description": "Scheme Recommendation Portal - Marginalised Entrepreneurs Portal",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "dev": "cd server && npm run dev",
+    "start": "cd server && npm start"
+  }
+}
