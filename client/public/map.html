@@ -7,21 +7,114 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link href="https://cdn.jsdelivr.net/npm/ol@9.2.4/ol.css" rel="stylesheet">
 <link rel="stylesheet" href="/css/style.css">
 <style>
   #map { height: 100%; width: 100%; border-radius: var(--radius); z-index: 0; }
-  .map-wrap { height: min(70vh, 640px); }
+  .map-wrap { height: min(70vh, 640px); position: relative; }
+ 
+  /* OpenLayers popup */
+  .ol-popup {
+    position: absolute;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid #E7E1D2;
+    bottom: 14px;
+    left: -60px;
+    min-width: 190px;
+    font-family: 'Inter', sans-serif;
+  }
+  .ol-popup:after, .ol-popup:before {
+    top: 100%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+  }
+  .ol-popup:after {
+    border-top-color: white;
+    border-width: 8px;
+    left: 56px;
+    margin-left: -8px;
+  }
+  .ol-popup:before {
+    border-top-color: #E7E1D2;
+    border-width: 9px;
+    left: 56px;
+    margin-left: -9px;
+  }
+  .ol-popup-closer {
+    position: absolute;
+    top: 4px;
+    right: 8px;
+    text-decoration: none;
+    color: #5B6866;
+    font-weight: 700;
+    cursor: pointer;
+  }
+ 
+  /* Custom zoom control positioning (top-right, like the old NavigationControl) */
+  .ol-zoom {
+    top: 12px !important;
+    left: auto !important;
+    right: 12px !important;
+  }
+  .ol-scale-line {
+    left: 8px !important;
+    bottom: 8px !important;
+  }
+
+  /* India boundary overlay legend/toggle — subtle, matches existing card styling */
+  .boundary-legend {
+    position: absolute;
+    left: 8px;
+    top: 12px;
+    z-index: 5;
+    background: rgba(255,255,255,0.92);
+    border: 1px solid #E7E1D2;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+    user-select: none;
+  }
+  .boundary-legend input {
+    width: 13px;
+    height: 13px;
+    accent-color: #0E9AA7;
+    cursor: pointer;
+  }
+  .boundary-legend .swatch {
+    display: inline-block;
+    width: 14px;
+    height: 0;
+    border-top: 2px dashed #0E9AA7;
+  }
+  .boundary-legend label {
+    cursor: pointer;
+    letter-spacing: .02em;
+    color: #3A4442;
+    font-weight: 600;
+  }
+ 
   @media (max-width: 767px) { .map-wrap { height: 420px; } }
 </style>
 </head>
 <body>
 <div id="site-header"></div>
-
+ 
 <main id="main" class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
   <h1 class="text-2xl md:text-3xl font-bold mb-1">Entrepreneurs near you</h1>
   <p class="mb-6" style="color:var(--color-muted)">Allow location access, or search manually, to see who's closest.</p>
-
+ 
   <div class="grid lg:grid-cols-[380px_1fr] gap-6">
     <!-- LEFT: search/filter/list -->
     <div>
@@ -38,20 +131,31 @@
       </div>
       <div id="listPanel" class="space-y-3 max-h-[520px] overflow-y-auto pr-1"></div>
     </div>
-
+ 
     <!-- RIGHT: map -->
     <div class="map-wrap card overflow-hidden">
       <div id="map"></div>
+      <div class="boundary-legend">
+        <input type="checkbox" id="boundaryToggle" checked>
+        <label for="boundaryToggle"><span class="swatch"></span> INDIA BOUNDARY (SURVEY OF INDIA)</label>
+        <span style="width:1px;height:14px;background:#E7E1D2;display:inline-block;margin:0 2px;"></span>
+        <input type="checkbox" id="stateLinesToggle">
+        <label for="stateLinesToggle" style="font-weight:500;color:#5B6866;">State lines (reference)</label>
+      </div>
+      <div id="popup" class="ol-popup hidden">
+        <a href="#" id="popup-closer" class="ol-popup-closer">✕</a>
+        <div id="popup-content"></div>
+      </div>
     </div>
   </div>
 </main>
-
+ 
 <div id="site-footer"></div>
-
+ 
 <script src="/js/api.js"></script>
 <script src="/js/nav.js"></script>
 <script src="/js/geo.js"></script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ol@9.2.4/dist/ol.js"></script>
 <script>
 const categoryFilter = document.getElementById('categoryFilter');
 CATEGORIES.forEach((c) => {
@@ -59,40 +163,236 @@ CATEGORIES.forEach((c) => {
   opt.value = c; opt.textContent = c;
   categoryFilter.appendChild(opt);
 });
-
-const map = L.map('map', { scrollWheelZoom: true }).setView([22.5, 78.9], 5); // India-wide default view
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-  maxZoom: 18,
-}).addTo(map);
-
-const entrepreneurIcon = L.divIcon({
-  className: 'entrepreneur-pin',
-  html: `<div style="background:#E2872F;width:16px;height:16px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,0.4);"></div>`,
-  iconSize: [16, 16],
-  iconAnchor: [8, 16],
+ 
+// India's true geographic centre (roughly Nagpur/Jabalpur belt), used for the
+// initial view. Real OSM tiles are used instead of the old demotiles style,
+// which drew India's borders inaccurately.
+const INDIA_CENTER = [78.9629, 22.5937];
+ 
+function toMercator(lat, lng) {
+  return ol.proj.fromLonLat([lng, lat]);
+}
+function fromMercator(coord) {
+  const [lng, lat] = ol.proj.toLonLat(coord);
+  return { lat, lng };
+}
+ 
+// --- Pin icon styles (SVG data URIs, mirroring the original teardrop pins) ---
+function pinSvg(fill, size, borderColor, borderWidth) {
+  const s = size;
+  const r = s / 2;
+  return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" width="${s + 6}" height="${s + 6}" viewBox="0 0 ${s + 6} ${s + 6}">
+      <g transform="translate(${(s + 6) / 2},${(s + 6) / 2}) rotate(-45) translate(${-r},${-r})">
+        <rect x="0" y="0" width="${s}" height="${s}" rx="${r}" ry="${r}"
+              fill="${fill}" stroke="${borderColor}" stroke-width="${borderWidth}"/>
+      </g>
+      <circle cx="${(s + 6) / 2}" cy="${(s + 6) / 2 - r * 0.15}" r="2" fill="rgba(255,255,255,0.9)"/>
+    </svg>
+  `);
+}
+function userSvg(fill, size, borderColor, borderWidth) {
+  const s = size;
+  const c = s / 2 + borderWidth;
+  return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" width="${s + borderWidth * 2}" height="${s + borderWidth * 2}" viewBox="0 0 ${s + borderWidth * 2} ${s + borderWidth * 2}">
+      <circle cx="${c}" cy="${c}" r="${s / 2}" fill="${fill}" stroke="${borderColor}" stroke-width="${borderWidth}"/>
+    </svg>
+  `);
+}
+ 
+const pinStyle = new ol.style.Style({
+  image: new ol.style.Icon({
+    src: pinSvg('#E2872F', 16, '#ffffff', 2),
+    anchor: [0.5, 1],
+    scale: 1,
+  }),
 });
-const userIcon = L.divIcon({
-  className: 'user-pin',
-  html: `<div style="background:#2F7A57;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.5);"></div>`,
-  iconSize: [16, 16],
-  iconAnchor: [8, 8],
+ 
+const userStyle = new ol.style.Style({
+  image: new ol.style.Icon({
+    src: userSvg('#2F7A57', 14, '#ffffff', 3),
+    anchor: [0.5, 0.5],
+  }),
+});
+ 
+// --- Base map: real OpenStreetMap tiles (accurate India coverage) ---
+const osmLayer = new ol.layer.Tile({ source: new ol.source.OSM() });
+
+// --- India boundary overlay ---
+// National outline (Tier 2, ON by default): loaded directly from the
+// Survey of India state map boundary — a single authoritative polygon
+// covering India's official territorial extent (full Jammu & Kashmir and
+// Ladakh up to ~37°N including Aksai Chin, and Arunachal Pradesh up to
+// ~97.4°E), as maintained by the DataMeet open-data GIS community.
+// Source data itself is tagged "Survey of India State Map, Datameet".
+// Repo: https://github.com/datameet/maps (Country/india-soi.geojson)
+// Served via jsDelivr, pinned to a specific commit for stability.
+const INDIA_BOUNDARY_URL =
+  'https://cdn.jsdelivr.net/gh/datameet/maps@b3fbbde595310b397a55d718e0958ce249a4fa1f/Country/india-soi.geojson';
+
+// The source file is very high-resolution (fine enough for legal/admin use),
+// which is more detail than a country/state zoom level needs and just slows
+// rendering. We thin it out after load with a Douglas–Peucker style vertex
+// reduction (tolerance in projected EPSG:3857 meters) — this only REMOVES
+// points along the existing outline, it never invents or shifts a coordinate.
+const BOUNDARY_SIMPLIFY_TOLERANCE = 800;
+
+const countryOutlineStyle = new ol.style.Style({
+  stroke: new ol.style.Stroke({
+    color: '#0E9AA7',
+    width: 2.2,
+  }),
 });
 
-let markers = [];
-let userMarker = null;
-let userLocation = null;
-let currentData = [];
+const countryOutlineSource = new ol.source.Vector({
+  url: INDIA_BOUNDARY_URL,
+  format: new ol.format.GeoJSON(),
+});
 
-function statusBadge(status) {
-  if (status === 'verified') return '<span class="badge badge-verified">✓ Verified</span>';
-  if (status === 'rejected') return '<span class="badge badge-rejected">Rejected</span>';
-  return '<span class="badge badge-pending">Pending</span>';
+const countryOutlineLayer = new ol.layer.Vector({
+  source: countryOutlineSource,
+  style: countryOutlineStyle,
+  zIndex: 1.5,          // above state lines, still below markers
+});
+countryOutlineLayer.set('name', 'india-national-outline-soi');
+
+countryOutlineSource.on('featuresloaderror', () => {
+  console.warn('India national outline: failed to load Survey-of-India boundary GeoJSON. Base map remains unaffected.');
+});
+
+// Simplify the loaded feature(s) in place once they arrive.
+countryOutlineSource.once('featuresloadend', () => {
+  countryOutlineSource.getFeatures().forEach((f) => {
+    const geom = f.getGeometry();
+    if (geom) {
+      f.setGeometry(geom.simplify(BOUNDARY_SIMPLIFY_TOLERANCE));
+    }
+  });
+});
+
+console.info(
+  'India national outline: Survey of India state map boundary, via ' +
+  'DataMeet (github.com/datameet/maps). Shown for presentation purposes; ' +
+  'verify against an authoritative source for any legal/compliance use.'
+);
+
+// State/UT lines (Tier 1, optional, OFF by default): a separate, denser
+// reference layer, kept independent of the national outline above so a
+// problem with this dataset can never distort the authoritative country
+// perimeter. Stroke-only, no fill, so there is no risk of semi-transparent
+// polygons stacking into a solid wash where states/islands touch.
+const STATE_LINES_URL =
+  'https://cdn.jsdelivr.net/gh/udit-001/india-maps-data@2884453/geojson/india.geojson';
+
+const stateBoundaryStyle = new ol.style.Style({
+  stroke: new ol.style.Stroke({
+    color: 'rgba(14, 154, 167, 0.4)',
+    width: 0.6,
+  }),
+});
+
+const stateBoundarySource = new ol.source.Vector({
+  url: STATE_LINES_URL,
+  format: new ol.format.GeoJSON(),
+});
+
+const stateBoundaryLayer = new ol.layer.Vector({
+  source: stateBoundarySource,
+  style: stateBoundaryStyle,
+  zIndex: 1,           // above base tiles, below the national outline/markers
+  visible: false,       // off by default — toggle separately, see legend
+});
+stateBoundaryLayer.set('name', 'india-state-lines-reference');
+
+stateBoundarySource.on('featuresloaderror', () => {
+  console.warn('State-lines reference layer: failed to load. National outline and base map remain unaffected.');
+});
+
+stateBoundarySource.once('featuresloadend', () => {
+  stateBoundarySource.getFeatures().forEach((f) => {
+    const geom = f.getGeometry();
+    if (geom) {
+      f.setGeometry(geom.simplify(BOUNDARY_SIMPLIFY_TOLERANCE));
+    }
+  });
+});
+
+const boundaryGroup = new ol.layer.Group({
+  layers: [stateBoundaryLayer, countryOutlineLayer],
+});
+boundaryGroup.set('name', 'india-boundary-group');
+ 
+const entrepreneurSource = new ol.source.Vector();
+const entrepreneurLayer = new ol.layer.Vector({ source: entrepreneurSource, style: pinStyle, zIndex: 5 });
+ 
+const userSource = new ol.source.Vector();
+const userLayer = new ol.layer.Vector({ source: userSource, style: userStyle, zIndex: 6 });
+ 
+const map = new ol.Map({
+  target: 'map',
+  // Layer order: OSM base -> India boundary group (state lines + national outline) -> entrepreneur pins -> user pin.
+  // zIndex is also set explicitly above so draw order stays correct regardless of array order.
+  layers: [osmLayer, boundaryGroup, entrepreneurLayer, userLayer],
+  view: new ol.View({
+    center: toMercator(22.5, 78.9),
+    zoom: 5,
+    minZoom: 3,
+    maxZoom: 18,
+  }),
+  controls: ol.control.defaults.defaults({ attribution: true, zoom: false }).extend([
+    new ol.control.Zoom(),
+    new ol.control.ScaleLine({ units: 'metric', minWidth: 80 }),
+    new ol.control.Attribution({
+      collapsible: true,
+      collapsed: true,
+    }),
+  ]),
+});
+
+// --- Boundary toggles (checkboxes above the map) ---
+// Main toggle: national outline (on by default). Secondary toggle: individual
+// state/UT lines (off by default, since that tier is denser and easily
+// reads as clutter — the user can opt in if they want it for the demo).
+const boundaryToggle = document.getElementById('boundaryToggle');
+if (boundaryToggle) {
+  countryOutlineLayer.setVisible(boundaryToggle.checked);
+  boundaryToggle.addEventListener('change', () => {
+    countryOutlineLayer.setVisible(boundaryToggle.checked);
+  });
 }
 
+const stateLinesToggle = document.getElementById('stateLinesToggle');
+if (stateLinesToggle) {
+  stateBoundaryLayer.setVisible(stateLinesToggle.checked);
+  stateLinesToggle.addEventListener('change', () => {
+    stateBoundaryLayer.setVisible(stateLinesToggle.checked);
+  });
+}
+ 
+// --- Popup overlay ---
+const popupEl = document.getElementById('popup');
+const popupContent = document.getElementById('popup-content');
+const popupCloser = document.getElementById('popup-closer');
+const popupOverlay = new ol.Overlay({
+  element: popupEl,
+  positioning: 'bottom-center',
+  stopEvent: true,
+  offset: [0, -14],
+});
+map.addOverlay(popupOverlay);
+ 
+popupCloser.addEventListener('click', (evt) => {
+  evt.preventDefault();
+  popupEl.classList.add('hidden');
+  popupOverlay.setPosition(undefined);
+  popupCloser.blur();
+  return false;
+});
+ 
 function popupHtml(e) {
   return `
-    <div style="min-width:180px">
+    <div style="min-width:170px">
       <strong>${e.businessName}</strong><br>
       <span style="font-size:12px;color:#5B6866">${e.category} · ${e.district}</span><br>
       ${e.distanceKm !== null && e.distanceKm !== undefined ? `<span style="font-size:12px;color:#2F7A57">${e.distanceKm} km away</span><br>` : ''}
@@ -100,7 +400,43 @@ function popupHtml(e) {
     </div>
   `;
 }
-
+ 
+function openPopup(coordinate, entrepreneur) {
+  popupContent.innerHTML = popupHtml(entrepreneur);
+  popupOverlay.setPosition(coordinate);
+  popupEl.classList.remove('hidden');
+}
+ 
+// Marker/popup hit-testing is intentionally scoped to entrepreneurLayer only,
+// so the boundary overlay (state lines + national outline, near-transparent
+// fill) never intercepts clicks, hover states, or blocks marker interaction.
+map.on('click', (evt) => {
+  const feature = map.forEachFeatureAtPixel(evt.pixel, (f) => f, {
+    layerFilter: (l) => l === entrepreneurLayer,
+  });
+  if (feature) {
+    openPopup(feature.getGeometry().getCoordinates(), feature.get('data'));
+  } else {
+    popupEl.classList.add('hidden');
+    popupOverlay.setPosition(undefined);
+  }
+});
+ 
+map.on('pointermove', (evt) => {
+  const hit = map.hasFeatureAtPixel(evt.pixel, { layerFilter: (l) => l === entrepreneurLayer });
+  map.getTargetElement().style.cursor = hit ? 'pointer' : '';
+});
+ 
+let markers = []; // parallel array of features, indexed like currentData
+let userLocation = null;
+let currentData = [];
+ 
+function statusBadge(status) {
+  if (status === 'verified') return '<span class="badge badge-verified">✓ Verified</span>';
+  if (status === 'rejected') return '<span class="badge badge-rejected">Rejected</span>';
+  return '<span class="badge badge-pending">Pending</span>';
+}
+ 
 function renderList(data) {
   const panel = document.getElementById('listPanel');
   if (!data.length) {
@@ -120,29 +456,34 @@ function renderList(data) {
       </div>
     </button>
   `).join('');
-
+ 
   panel.querySelectorAll('.list-item').forEach((btn) => {
     btn.addEventListener('click', () => {
       const idx = parseInt(btn.dataset.idx, 10);
       const e = data[idx];
-      map.setView([e.latitude, e.longitude], 14, { animate: true });
-      const marker = markers[idx];
-      if (marker) marker.openPopup();
+      if (!e.latitude || !e.longitude) return;
+      const coord = toMercator(e.latitude, e.longitude);
+      map.getView().animate({ center: coord, zoom: 14, duration: 500 });
+      openPopup(coord, e);
     });
   });
 }
-
+ 
 function renderMarkers(data) {
-  markers.forEach((m) => map.removeLayer(m));
-  markers = data
+  entrepreneurSource.clear();
+  markers = [];
+  data
     .filter((e) => e.latitude && e.longitude)
-    .map((e) => {
-      const marker = L.marker([e.latitude, e.longitude], { icon: entrepreneurIcon }).addTo(map);
-      marker.bindPopup(popupHtml(e));
-      return marker;
+    .forEach((e) => {
+      const feature = new ol.Feature({
+        geometry: new ol.geom.Point(toMercator(e.latitude, e.longitude)),
+      });
+      feature.set('data', e);
+      entrepreneurSource.addFeature(feature);
+      markers.push(feature);
     });
 }
-
+ 
 async function loadMapData() {
   const params = new URLSearchParams();
   const search = document.getElementById('searchInput').value.trim();
@@ -150,7 +491,7 @@ async function loadMapData() {
   if (search) params.set('search', search);
   if (category) params.set('category', category);
   if (userLocation) { params.set('lat', userLocation.lat); params.set('lng', userLocation.lng); params.set('sort', 'distance'); }
-
+ 
   try {
     const data = await apiRequest(`/entrepreneurs?${params.toString()}`, { auth: false });
     currentData = data.entrepreneurs;
@@ -160,7 +501,7 @@ async function loadMapData() {
     showToast(err.message, 'error');
   }
 }
-
+ 
 ['searchInput'].forEach((id) => {
   let t;
   document.getElementById(id).addEventListener('input', () => {
@@ -169,7 +510,7 @@ async function loadMapData() {
   });
 });
 categoryFilter.addEventListener('change', loadMapData);
-
+ 
 document.getElementById('nearMeBtn').addEventListener('click', async () => {
   const status = document.getElementById('locationStatus');
   status.textContent = 'Getting your location...';
@@ -183,13 +524,14 @@ document.getElementById('nearMeBtn').addEventListener('click', async () => {
     document.getElementById('manualLocation').classList.remove('hidden');
   }
 });
-
+ 
 function placeUserMarker(lat, lng) {
-  if (userMarker) map.removeLayer(userMarker);
-  userMarker = L.marker([lat, lng], { icon: userIcon }).addTo(map).bindPopup('You are here');
-  map.setView([lat, lng], 12);
+  userSource.clear();
+  const feature = new ol.Feature({ geometry: new ol.geom.Point(toMercator(lat, lng)) });
+  userSource.addFeature(feature);
+  map.getView().animate({ center: toMercator(lat, lng), zoom: 12, duration: 500 });
 }
-
+ 
 // Manual location fallback using OpenStreetMap Nominatim geocoding (no API key required)
 document.getElementById('manualSearchBtn').addEventListener('click', async () => {
   const q = document.getElementById('manualAddress').value.trim();
@@ -211,7 +553,7 @@ document.getElementById('manualSearchBtn').addEventListener('click', async () =>
     status.textContent = 'Could not search that location right now.';
   }
 });
-
+ 
 loadMapData();
 </script>
 </body>

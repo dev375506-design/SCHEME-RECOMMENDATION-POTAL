@@ -7,9 +7,20 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link href="https://unpkg.com/maplibre-gl@5.2.0/dist/maplibre-gl.css" rel="stylesheet">
 <link rel="stylesheet" href="/css/style.css">
-<style>#profileMap { height: 260px; border-radius: var(--radius); z-index: 0; }</style>
+<style>#profileMap { height: 260px; border-radius: var(--radius); z-index: 0; }
+  .map-pin {
+    display: block;
+    width: 16px;
+    height: 16px;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    border: 2px solid white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+    background: #E2872F;
+  }
+</style>
 </head>
 <body>
 <div id="site-header"></div>
@@ -82,9 +93,19 @@
 
 <script src="/js/api.js"></script>
 <script src="/js/nav.js"></script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/maplibre-gl@5.2.0/dist/maplibre-gl.js"></script>
 <script>
 const id = qs('id');
+const toMapLibreCoords = (lat, lng) => [lng, lat];
+
+function createMapPin(color = '#E2872F', size = 16) {
+  const el = document.createElement('div');
+  el.className = 'map-pin';
+  el.style.width = `${size}px`;
+  el.style.height = `${size}px`;
+  el.style.background = color;
+  return el;
+}
 
 function statusBadgeHtml(status) {
   if (status === 'verified') return '<span class="badge badge-verified">✓ Verified business</span>';
@@ -152,16 +173,26 @@ async function loadProfile() {
     });
 
     if (e.latitude && e.longitude) {
-      const map = L.map('profileMap', { scrollWheelZoom: false }).setView([e.latitude, e.longitude], 14);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors',
-      }).addTo(map);
-      const icon = L.divIcon({
-        className: 'entrepreneur-pin',
-        html: `<div style="background:#E2872F;width:16px;height:16px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid white;"></div>`,
-        iconSize: [16, 16], iconAnchor: [8, 16],
+      const map = new maplibregl.Map({
+        container: 'profileMap',
+        style: 'https://demotiles.maplibre.org/style.json',
+        center: toMapLibreCoords(e.latitude, e.longitude),
+        zoom: 14,
+        interactive: true,
+        attributionControl: true,
       });
-      L.marker([e.latitude, e.longitude], { icon }).addTo(map).bindPopup(e.businessName).openPopup();
+      map.addControl(new maplibregl.NavigationControl({ showCompass: true, showZoom: true }), 'top-right');
+      map.addControl(new maplibregl.ScaleControl({ maxWidth: 80, unit: 'metric' }), 'bottom-left');
+      map.on('load', () => {
+        new maplibregl.Marker({
+          element: createMapPin('#E2872F', 16),
+          anchor: 'bottom',
+        })
+          .setLngLat(toMapLibreCoords(e.latitude, e.longitude))
+          .setPopup(new maplibregl.Popup({ offset: 12 }).setHTML(e.businessName))
+          .addTo(map)
+          .togglePopup();
+      });
     } else {
       document.getElementById('profileMap').innerHTML = '<p class="text-sm" style="color:var(--color-muted)">Location not available.</p>';
     }
