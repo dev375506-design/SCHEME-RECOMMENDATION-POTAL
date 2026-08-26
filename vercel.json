@@ -63,9 +63,5 @@
         }
       ]
     }
-  ],
-  "env": [
-    "JWT_SECRET",
-    "PORT"
   ]
 }
