@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — Udyam Setu</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="site-header"></div>
+
+<main id="main" class="max-w-md mx-auto px-4 sm:px-6 py-14">
+  <h1 class="text-2xl md:text-3xl font-bold mb-1">Log in</h1>
+  <p class="mb-8" style="color:var(--color-muted)">Entrepreneur or admin? Use your phone number and password.</p>
+
+  <div class="card p-6">
+    <form id="loginForm" novalidate>
+      <label class="field-label" for="phone">Phone number</label>
+      <input class="field-input mb-4" id="phone" required inputmode="numeric" maxlength="10" autocomplete="tel">
+      <label class="field-label" for="password">Password</label>
+      <input class="field-input mb-4" id="password" type="password" required autocomplete="current-password">
+      <div id="loginError" class="field-error mb-3 hidden"></div>
+      <button class="btn btn-primary w-full" type="submit">Log in</button>
+    </form>
+    <p class="text-sm mt-5" style="color:var(--color-muted)">New entrepreneur? <a href="/register.html" class="underline">Register your business</a></p>
+    <div class="mt-5 p-3 rounded-lg text-xs" style="background:#F3F7F5; color:var(--color-muted); border:1px solid var(--color-border);">
+      <strong>Demo credentials</strong><br>
+      Admin — phone <code>9999999999</code> / password <code>admin123</code><br>
+      Sample entrepreneur — phone <code>9820011122</code> / password <code>demo1234</code>
+    </div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+
+<script src="/js/api.js"></script>
+<script src="/js/nav.js"></script>
+<script>
+if (Auth.isLoggedIn()) window.location.href = '/dashboard.html';
+
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const errorEl = document.getElementById('loginError');
+  errorEl.classList.add('hidden');
+  const phone = document.getElementById('phone').value.trim();
+  const password = document.getElementById('password').value;
+  try {
+    const data = await apiRequest('/auth/login', { method: 'POST', auth: false, body: { phone, password } });
+    Auth.setToken(data.token);
+    Auth.setUser(data.user);
+    window.location.href = data.user.role === 'admin' ? '/admin.html' : '/dashboard.html';
+  } catch (err) {
+    errorEl.textContent = err.message;
+    errorEl.classList.remove('hidden');
+  }
+});
+</script>
+</body>
+</html>

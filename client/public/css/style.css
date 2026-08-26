@@ -1,0 +1,220 @@
+/* ============================================================
+   Marginalised Entrepreneurs Portal — design tokens & components
+   Palette: deep indigo-teal (trust, government) + marigold/saffron
+   (local markets, warmth) + supportive green (growth).
+   Type: Poppins (display) / Inter (body).
+   ============================================================ */
+:root {
+  --color-ink: #0E2E30;        /* deep indigo-teal, primary */
+  --color-ink-2: #123C3E;
+  --color-saffron: #E2872F;    /* marigold/saffron accent */
+  --color-saffron-dark: #C56E1F;
+  --color-green: #2F7A57;      /* supportive/growth green */
+  --color-bg: #FBF9F5;         /* warm paper, not cream-dominant */
+  --color-surface: #FFFFFF;
+  --color-border: #E4DFD3;
+  --color-text: #1B2624;
+  --color-muted: #5B6866;
+  --radius: 14px;
+  --shadow-card: 0 1px 2px rgba(14, 46, 48, 0.06), 0 6px 20px rgba(14, 46, 48, 0.06);
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  margin: 0;
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, .font-display {
+  font-family: 'Poppins', 'Inter', sans-serif;
+  color: var(--color-ink);
+  letter-spacing: -0.01em;
+}
+
+a { color: inherit; }
+
+/* ---------- Signature motif: a stitched thread divider (nod to textile/handicraft artisans) ---------- */
+.stitch-divider {
+  width: 100%;
+  height: 10px;
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--color-saffron) 0 14px,
+    transparent 14px 26px
+  );
+  opacity: 0.55;
+  border-radius: 999px;
+}
+
+/* ---------- Nav ---------- */
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+.site-nav a.nav-link {
+  color: var(--color-ink);
+  font-weight: 500;
+  font-size: 0.95rem;
+  padding: 0.5rem 0.15rem;
+  border-bottom: 2px solid transparent;
+  transition: border-color .15s ease, color .15s ease;
+}
+.site-nav a.nav-link:hover,
+.site-nav a.nav-link.active {
+  border-bottom-color: var(--color-saffron);
+  color: var(--color-saffron-dark);
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.7rem 1.4rem;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease;
+  text-decoration: none;
+}
+.btn:active { transform: translateY(1px); }
+.btn-primary { background: var(--color-saffron); color: #fff; }
+.btn-primary:hover { background: var(--color-saffron-dark); }
+.btn-outline { background: transparent; color: var(--color-ink); border-color: var(--color-ink); }
+.btn-outline:hover { background: var(--color-ink); color: #fff; }
+.btn-ghost { background: rgba(255,255,255,0.12); color: #fff; border-color: rgba(255,255,255,0.4); }
+.btn-ghost:hover { background: rgba(255,255,255,0.22); }
+.btn-green { background: var(--color-green); color: #fff; }
+.btn-green:hover { filter: brightness(0.92); }
+.btn-sm { padding: 0.45rem 0.9rem; font-size: 0.85rem; border-radius: 8px; }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* ---------- Cards ---------- */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.22rem 0.6rem;
+  border-radius: 999px;
+}
+.badge-verified { background: #E7F4EC; color: var(--color-green); }
+.badge-pending { background: #FCF0DE; color: var(--color-saffron-dark); }
+.badge-rejected { background: #FBE9E7; color: #B3401F; }
+
+/* ---------- Form elements ---------- */
+.field-label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--color-ink);
+  margin-bottom: 0.3rem;
+}
+.field-input, .field-select, .field-textarea {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  background: #fff;
+  color: var(--color-text);
+}
+.field-input:focus, .field-select:focus, .field-textarea:focus {
+  outline: 2px solid var(--color-saffron);
+  outline-offset: 1px;
+  border-color: var(--color-saffron);
+}
+.field-error {
+  color: #B3401F;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+.field-hint {
+  color: var(--color-muted);
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+/* ---------- Hero ---------- */
+.hero {
+  background: radial-gradient(120% 160% at 15% 0%, var(--color-ink-2) 0%, var(--color-ink) 55%, #081E1F 100%);
+  color: #F5F1E8;
+  position: relative;
+  overflow: hidden;
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(226,135,47,0.18) 1.5px, transparent 1.5px);
+  background-size: 26px 26px;
+  opacity: 0.5;
+  pointer-events: none;
+}
+.hero h1 { color: #fff; }
+.hero .eyebrow {
+  color: var(--color-saffron);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+}
+
+/* ---------- Utility ---------- */
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  background: #fff;
+  padding: 0.5rem 1rem;
+  z-index: 100;
+}
+.skip-link:focus { left: 1rem; top: 1rem; }
+
+.leaflet-marker-icon.entrepreneur-pin { filter: drop-shadow(0 2px 3px rgba(0,0,0,0.35)); }
+
+.toast {
+  position: fixed;
+  bottom: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-ink);
+  color: #fff;
+  padding: 0.75rem 1.25rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  z-index: 200;
+  box-shadow: var(--shadow-card);
+  max-width: 90vw;
+}
+.toast.error { background: #B3401F; }
+.toast.success { background: var(--color-green); }
+
+::selection { background: var(--color-saffron); color: #fff; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { scroll-behavior: auto !important; transition: none !important; }
+}

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register Your Business — Udyam Setu</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="site-header"></div>
+
+<main id="main" class="max-w-3xl mx-auto px-4 sm:px-6 py-10">
+  <h1 class="text-2xl md:text-3xl font-bold mb-1">Register your business</h1>
+  <p class="mb-8" style="color:var(--color-muted)">Takes about two minutes. Fields marked * are required. You'll get an account so you can edit your profile later.</p>
+
+  <div id="accountStep" class="card p-6 mb-6">
+    <h2 class="font-semibold mb-4" style="color:var(--color-ink)">Step 1 — Create your account</h2>
+    <form id="accountForm" class="grid sm:grid-cols-2 gap-4" novalidate>
+      <div>
+        <label class="field-label" for="accName">Your name *</label>
+        <input class="field-input" id="accName" required autocomplete="name">
+      </div>
+      <div>
+        <label class="field-label" for="accPhone">Phone number *</label>
+        <input class="field-input" id="accPhone" required inputmode="numeric" maxlength="10" placeholder="10-digit mobile number" autocomplete="tel">
+      </div>
+      <div>
+        <label class="field-label" for="accEmail">Email (optional)</label>
+        <input class="field-input" id="accEmail" type="email" autocomplete="email">
+      </div>
+      <div>
+        <label class="field-label" for="accPassword">Create a password *</label>
+        <input class="field-input" id="accPassword" type="password" required minlength="6" autocomplete="new-password">
+        <p class="field-hint">At least 6 characters. You'll use your phone number + this password to log in.</p>
+      </div>
+      <div id="accountError" class="field-error sm:col-span-2 hidden"></div>
+      <div class="sm:col-span-2">
+        <button class="btn btn-primary" type="submit">Continue to business details</button>
+        <span class="text-sm ml-3" style="color:var(--color-muted)">Already registered? <a href="/login.html" class="underline">Log in</a></span>
+      </div>
+    </form>
+  </div>
+
+  <div id="businessStep" class="card p-6 hidden">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="font-semibold" style="color:var(--color-ink)">Step 2 — Business details</h2>
+      <span id="loggedAs" class="text-xs" style="color:var(--color-muted)"></span>
+    </div>
+    <form id="businessForm" class="grid sm:grid-cols-2 gap-4" novalidate>
+      <div class="sm:col-span-2">
+        <label class="field-label" for="businessName">Business name *</label>
+        <input class="field-input" id="businessName" required>
+      </div>
+      <div>
+        <label class="field-label" for="entrepreneurName">Entrepreneur name *</label>
+        <input class="field-input" id="entrepreneurName" required>
+      </div>
+      <div>
+        <label class="field-label" for="category">Category *</label>
+        <select class="field-select" id="category" required></select>
+      </div>
+      <div class="sm:col-span-2">
+        <label class="field-label" for="description">Business description *</label>
+        <textarea class="field-textarea" id="description" rows="3" required placeholder="What do you make or offer? What makes your business special?"></textarea>
+      </div>
+      <div class="sm:col-span-2">
+        <label class="field-label" for="productsServices">Products / services offered</label>
+        <input class="field-input" id="productsServices" placeholder="e.g. Hand-stitched kurtas, alterations, custom blouses">
+      </div>
+      <div>
+        <label class="field-label" for="bizPhone">Business contact number *</label>
+        <input class="field-input" id="bizPhone" required inputmode="numeric" maxlength="10">
+      </div>
+      <div>
+        <label class="field-label" for="bizEmail">Business email (optional)</label>
+        <input class="field-input" id="bizEmail" type="email">
+      </div>
+      <div class="sm:col-span-2">
+        <label class="field-label" for="address">Address *</label>
+        <input class="field-input" id="address" required>
+      </div>
+      <div>
+        <label class="field-label" for="district">District *</label>
+        <input class="field-input" id="district" required>
+      </div>
+      <div>
+        <label class="field-label" for="state">State *</label>
+        <input class="field-input" id="state" required>
+      </div>
+      <div>
+        <label class="field-label" for="pincode">Pincode *</label>
+        <input class="field-input" id="pincode" required inputmode="numeric" maxlength="6" placeholder="6-digit pincode">
+      </div>
+      <div>
+        <label class="field-label" for="socialLink">Social / contact link (optional)</label>
+        <input class="field-input" id="socialLink" placeholder="Instagram, Facebook, WhatsApp link...">
+      </div>
+
+      <div class="sm:col-span-2 p-4 rounded-lg" style="background:#F3F7F5; border:1px solid var(--color-border);">
+        <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+          <label class="field-label mb-0">Location (latitude / longitude) *</label>
+          <button type="button" id="useLocationBtn" class="btn btn-green btn-sm">📍 Use my current location</button>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <input class="field-input" id="latitude" placeholder="Latitude" required>
+          <input class="field-input" id="longitude" placeholder="Longitude" required>
+        </div>
+        <p class="field-hint" id="locationStatus">We use this to show your business on the map and calculate distance to nearby customers.</p>
+      </div>
+
+      <div class="sm:col-span-2">
+        <label class="field-label" for="imageInput">Business photo / logo (optional)</label>
+        <input class="field-input" id="imageInput" type="file" accept="image/*">
+        <img id="imagePreview" class="hidden mt-2 rounded-lg" style="max-height:140px;" alt="Preview of uploaded business photo">
+      </div>
+
+      <div class="sm:col-span-2 flex items-center gap-2">
+        <input type="checkbox" id="needsSupport" class="w-4 h-4">
+        <label for="needsSupport" class="text-sm">I would like to be shown relevant government schemes / support</label>
+      </div>
+
+      <div>
+        <label class="field-label" for="businessStatus">Current business status</label>
+        <select class="field-select" id="businessStatus">
+          <option value="active">Currently active</option>
+          <option value="starting">Just starting out</option>
+          <option value="paused">Temporarily paused</option>
+        </select>
+      </div>
+
+      <div id="businessError" class="field-error sm:col-span-2 hidden"></div>
+      <div class="sm:col-span-2">
+        <button class="btn btn-primary" type="submit">Submit for verification</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="successStep" class="card p-8 text-center hidden">
+    <div class="text-4xl mb-3">🎉</div>
+    <h2 class="text-xl font-bold mb-2">Your business profile has been submitted!</h2>
+    <p class="mb-6" style="color:var(--color-muted)">It's now pending admin verification and will appear in the directory and map once approved. You can edit it anytime from your dashboard.</p>
+    <div class="flex gap-3 justify-center flex-wrap">
+      <a href="/dashboard.html" class="btn btn-primary">Go to my dashboard</a>
+      <a href="/map.html" class="btn btn-outline">View the map</a>
+    </div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+
+<script src="/js/api.js"></script>
+<script src="/js/nav.js"></script>
+<script src="/js/geo.js"></script>
+<script>
+const categorySelect = document.getElementById('category');
+CATEGORIES.forEach((c) => {
+  const opt = document.createElement('option');
+  opt.value = c; opt.textContent = c;
+  categorySelect.appendChild(opt);
+});
+
+const accountStep = document.getElementById('accountStep');
+const businessStep = document.getElementById('businessStep');
+const successStep = document.getElementById('successStep');
+
+// If already logged in as an entrepreneur without a profile, skip straight to step 2
+(async function initStep() {
+  if (Auth.isLoggedIn()) {
+    try {
+      const { entrepreneur } = await apiRequest('/entrepreneurs/me');
+      if (entrepreneur) {
+        window.location.href = '/dashboard.html';
+        return;
+      }
+      accountStep.classList.add('hidden');
+      businessStep.classList.remove('hidden');
+      const user = Auth.getUser();
+      document.getElementById('loggedAs').textContent = user ? `Logged in as ${user.name} (${user.phone})` : '';
+    } catch (e) { /* token invalid, stay on step 1 */ }
+  }
+})();
+
+document.getElementById('accountForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const errorEl = document.getElementById('accountError');
+  errorEl.classList.add('hidden');
+  const name = document.getElementById('accName').value.trim();
+  const phone = document.getElementById('accPhone').value.trim();
+  const email = document.getElementById('accEmail').value.trim();
+  const password = document.getElementById('accPassword').value;
+
+  if (!/^\d{10}$/.test(phone)) {
+    errorEl.textContent = 'Phone number must be exactly 10 digits.';
+    errorEl.classList.remove('hidden');
+    return;
+  }
+  try {
+    const data = await apiRequest('/auth/register', { method: 'POST', auth: false, body: { name, phone, email, password, role: 'entrepreneur' } });
+    Auth.setToken(data.token);
+    Auth.setUser(data.user);
+    document.getElementById('bizPhone').value = phone;
+    document.getElementById('entrepreneurName').value = name;
+    document.getElementById('loggedAs').textContent = `Logged in as ${name} (${phone})`;
+    accountStep.classList.add('hidden');
+    businessStep.classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (err) {
+    errorEl.textContent = err.message;
+    errorEl.classList.remove('hidden');
+  }
+});
+
+document.getElementById('useLocationBtn').addEventListener('click', async () => {
+  const status = document.getElementById('locationStatus');
+  status.textContent = 'Getting your location...';
+  try {
+    const { lat, lng } = await getCurrentLocation();
+    document.getElementById('latitude').value = lat.toFixed(6);
+    document.getElementById('longitude').value = lng.toFixed(6);
+    status.textContent = 'Location captured from your device ✓';
+  } catch (err) {
+    status.textContent = `${err.message} You can enter latitude/longitude manually, or find them by searching your address on a map.`;
+  }
+});
+
+document.getElementById('imageInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const preview = document.getElementById('imagePreview');
+    preview.src = reader.result;
+    preview.classList.remove('hidden');
+    document.getElementById('imageInput').dataset.dataUrl = reader.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('businessForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const errorEl = document.getElementById('businessError');
+  errorEl.classList.add('hidden');
+
+  const pincode = document.getElementById('pincode').value.trim();
+  const bizPhone = document.getElementById('bizPhone').value.trim();
+  const latitude = document.getElementById('latitude').value.trim();
+  const longitude = document.getElementById('longitude').value.trim();
+
+  if (!/^\d{6}$/.test(pincode)) return showFormError('Pincode must be exactly 6 digits.');
+  if (!/^\d{10}$/.test(bizPhone)) return showFormError('Business phone must be exactly 10 digits.');
+  if (!latitude || !longitude || isNaN(parseFloat(latitude)) || isNaN(parseFloat(longitude))) {
+    return showFormError('Please provide latitude and longitude, or use "Use my current location".');
+  }
+
+  function showFormError(msg) {
+    errorEl.textContent = msg;
+    errorEl.classList.remove('hidden');
+    errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  const body = {
+    businessName: document.getElementById('businessName').value.trim(),
+    entrepreneurName: document.getElementById('entrepreneurName').value.trim(),
+    category: categorySelect.value,
+    description: document.getElementById('description').value.trim(),
+    productsServices: document.getElementById('productsServices').value.trim(),
+    phone: bizPhone,
+    email: document.getElementById('bizEmail').value.trim(),
+    address: document.getElementById('address').value.trim(),
+    district: document.getElementById('district').value.trim(),
+    state: document.getElementById('state').value.trim(),
+    pincode,
+    latitude,
+    longitude,
+    socialLink: document.getElementById('socialLink').value.trim(),
+    image: document.getElementById('imageInput').dataset.dataUrl || '',
+    needsSupport: document.getElementById('needsSupport').checked,
+    businessStatus: document.getElementById('businessStatus').value,
+  };
+
+  try {
+    await apiRequest('/entrepreneurs', { method: 'POST', body });
+    businessStep.classList.add('hidden');
+    successStep.classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (err) {
+    showFormError(err.message);
+  }
+});
+</script>
+</body>
+</html>

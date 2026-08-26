@@ -1,0 +1,91 @@
+[
+  {
+    "id": "mta62repr3k2i7f2",
+    "createdAt": "2026-08-26T14:06:06.145Z",
+    "name": "PM Employment Generation Programme (PMEGP)",
+    "description": "A credit-linked subsidy scheme that helps set up new micro-enterprises, offering margin money subsidy on bank loans for manufacturing and service units.",
+    "eligibility": "Individuals above 18 years; no income ceiling for setting up new projects under the general category.",
+    "benefits": "Subsidy of 15-35% of project cost depending on category and area (rural/urban); balance as bank loan.",
+    "documents": "Aadhaar card, project report, caste/category certificate (if applicable), education certificate.",
+    "categories": [
+      "Handicrafts",
+      "Food",
+      "Small Manufacturing",
+      "Tailoring",
+      "Artisans"
+    ],
+    "officialUrl": "https://www.kviconline.gov.in/pmegpeportal/pmegphome/index.jsp"
+  },
+  {
+    "id": "mta62reqa5j9ppoz",
+    "createdAt": "2026-08-26T14:06:06.146Z",
+    "name": "PM Vishwakarma Scheme",
+    "description": "Support scheme for traditional artisans and craftspeople working with their hands and tools, covering 18 trades.",
+    "eligibility": "Artisans and craftspeople engaged in one of the 18 identified trades, working through hands and tools.",
+    "benefits": "Skill training, toolkit incentive, collateral-free credit support, and marketing assistance.",
+    "documents": "Aadhaar card, trade proof/certificate, bank account details.",
+    "categories": [
+      "Artisans",
+      "Handicrafts",
+      "Tailoring",
+      "Small Manufacturing"
+    ],
+    "officialUrl": "https://pmvishwakarma.gov.in/"
+  },
+  {
+    "id": "mta62rerldh7lbxx",
+    "createdAt": "2026-08-26T14:06:06.147Z",
+    "name": "Pradhan Mantri MUDRA Yojana (PMMY)",
+    "description": "Provides collateral-free loans up to ₹10 lakh to non-corporate, non-farm small and micro enterprises under Shishu, Kishor and Tarun categories.",
+    "eligibility": "Any Indian citizen with a business plan for a non-farm income-generating activity.",
+    "benefits": "Loans up to ₹10 lakh without collateral, offered through banks, NBFCs and MFIs.",
+    "documents": "Identity proof, address proof, business plan, passport-size photos.",
+    "categories": [
+      "All"
+    ],
+    "officialUrl": "https://www.mudra.org.in/"
+  },
+  {
+    "id": "mta62retjun4oeo7",
+    "createdAt": "2026-08-26T14:06:06.149Z",
+    "name": "Stand-Up India Scheme",
+    "description": "Facilitates bank loans for setting up greenfield enterprises, aimed at women and SC/ST entrepreneurs.",
+    "eligibility": "SC/ST and/or women entrepreneurs above 18 years, for greenfield (first-time) enterprises.",
+    "benefits": "Bank loans between ₹10 lakh and ₹1 crore for setting up a new enterprise.",
+    "documents": "Identity proof, address proof, business project report, caste certificate (if applicable).",
+    "categories": [
+      "Small Manufacturing",
+      "Local Services",
+      "Food"
+    ],
+    "officialUrl": "https://www.standupmitra.in/"
+  },
+  {
+    "id": "mta62reu3rkak2c9",
+    "createdAt": "2026-08-26T14:06:06.150Z",
+    "name": "PM Formalisation of Micro Food Processing Enterprises (PM FME)",
+    "description": "Supports formalisation and upgrade of existing micro food processing enterprises, including individuals and self-help groups.",
+    "eligibility": "Existing micro food processing units, individuals, FPOs, self-help groups and cooperatives.",
+    "benefits": "Credit-linked subsidy of 35% of eligible project cost, common infrastructure and branding support.",
+    "documents": "Aadhaar card, business registration (if any), bank account details, project report.",
+    "categories": [
+      "Food"
+    ],
+    "officialUrl": "https://pmfme.mofpi.gov.in/"
+  },
+  {
+    "id": "mta62rew8dldzejr",
+    "createdAt": "2026-08-26T14:06:06.152Z",
+    "name": "National Rural Livelihood Mission (NRLM / Aajeevika)",
+    "description": "Promotes self-help groups and community institutions among rural poor households, with access to financial services and livelihood support.",
+    "eligibility": "Rural poor households, especially women, willing to join or form self-help groups.",
+    "benefits": "Revolving fund, community investment support, bank linkage and skill training.",
+    "documents": "Aadhaar card, BPL/household verification, bank account details.",
+    "categories": [
+      "Agriculture",
+      "Home-based Businesses",
+      "Local Services"
+    ],
+    "officialUrl": "https://aajeevika.gov.in/"
+  }
+]

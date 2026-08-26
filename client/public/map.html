@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Map — Udyam Setu</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="/css/style.css">
+<style>
+  #map { height: 100%; width: 100%; border-radius: var(--radius); z-index: 0; }
+  .map-wrap { height: min(70vh, 640px); }
+  @media (max-width: 767px) { .map-wrap { height: 420px; } }
+</style>
+</head>
+<body>
+<div id="site-header"></div>
+
+<main id="main" class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+  <h1 class="text-2xl md:text-3xl font-bold mb-1">Entrepreneurs near you</h1>
+  <p class="mb-6" style="color:var(--color-muted)">Allow location access, or search manually, to see who's closest.</p>
+
+  <div class="grid lg:grid-cols-[380px_1fr] gap-6">
+    <!-- LEFT: search/filter/list -->
+    <div>
+      <div class="card p-4 mb-4">
+        <input id="searchInput" class="field-input mb-3" placeholder="Search business or product...">
+        <select id="categoryFilter" class="field-select mb-3"><option value="">All categories</option></select>
+        <button id="nearMeBtn" class="btn btn-green btn-sm w-full mb-2">📍 Use My Location — Find Near Me</button>
+        <div id="manualLocation" class="hidden mt-2">
+          <label class="field-label" for="manualAddress">Or search a place manually</label>
+          <input id="manualAddress" class="field-input mb-2" placeholder="e.g. Ahmedabad, Gujarat">
+          <button id="manualSearchBtn" class="btn btn-outline btn-sm w-full">Search location</button>
+        </div>
+        <p id="locationStatus" class="text-xs mt-2" style="color:var(--color-muted)"></p>
+      </div>
+      <div id="listPanel" class="space-y-3 max-h-[520px] overflow-y-auto pr-1"></div>
+    </div>
+
+    <!-- RIGHT: map -->
+    <div class="map-wrap card overflow-hidden">
+      <div id="map"></div>
+    </div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+
+<script src="/js/api.js"></script>
+<script src="/js/nav.js"></script>
+<script src="/js/geo.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const categoryFilter = document.getElementById('categoryFilter');
+CATEGORIES.forEach((c) => {
+  const opt = document.createElement('option');
+  opt.value = c; opt.textContent = c;
+  categoryFilter.appendChild(opt);
+});
+
+const map = L.map('map', { scrollWheelZoom: true }).setView([22.5, 78.9], 5); // India-wide default view
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  maxZoom: 18,
+}).addTo(map);
+
+const entrepreneurIcon = L.divIcon({
+  className: 'entrepreneur-pin',
+  html: `<div style="background:#E2872F;width:16px;height:16px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,0.4);"></div>`,
+  iconSize: [16, 16],
+  iconAnchor: [8, 16],
+});
+const userIcon = L.divIcon({
+  className: 'user-pin',
+  html: `<div style="background:#2F7A57;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.5);"></div>`,
+  iconSize: [16, 16],
+  iconAnchor: [8, 8],
+});
+
+let markers = [];
+let userMarker = null;
+let userLocation = null;
+let currentData = [];
+
+function statusBadge(status) {
+  if (status === 'verified') return '<span class="badge badge-verified">✓ Verified</span>';
+  if (status === 'rejected') return '<span class="badge badge-rejected">Rejected</span>';
+  return '<span class="badge badge-pending">Pending</span>';
+}
+
+function popupHtml(e) {
+  return `
+    <div style="min-width:180px">
+      <strong>${e.businessName}</strong><br>
+      <span style="font-size:12px;color:#5B6866">${e.category} · ${e.district}</span><br>
+      ${e.distanceKm !== null && e.distanceKm !== undefined ? `<span style="font-size:12px;color:#2F7A57">${e.distanceKm} km away</span><br>` : ''}
+      <a href="/profile.html?id=${e.id}" style="color:#E2872F;font-weight:600;font-size:13px;">View profile →</a>
+    </div>
+  `;
+}
+
+function renderList(data) {
+  const panel = document.getElementById('listPanel');
+  if (!data.length) {
+    panel.innerHTML = `<p class="text-sm text-center py-8" style="color:var(--color-muted)">No entrepreneurs match. Try a different filter.</p>`;
+    return;
+  }
+  panel.innerHTML = data.map((e, i) => `
+    <button data-idx="${i}" class="list-item card p-3 w-full text-left flex gap-3 items-start hover:shadow-md transition">
+      <div style="width:36px;height:36px;border-radius:8px;background:#EFE8D8;display:flex;align-items:center;justify-content:center;flex-shrink:0;">🛍️</div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center justify-between gap-2">
+          <span class="font-semibold text-sm truncate" style="color:var(--color-ink)">${e.businessName}</span>
+          ${statusBadge(e.verificationStatus)}
+        </div>
+        <p class="text-xs truncate" style="color:var(--color-muted)">${e.category} · ${e.district}, ${e.state}</p>
+        ${e.distanceKm !== null && e.distanceKm !== undefined ? `<p class="text-xs" style="color:var(--color-green)">${e.distanceKm} km away</p>` : ''}
+      </div>
+    </button>
+  `).join('');
+
+  panel.querySelectorAll('.list-item').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.idx, 10);
+      const e = data[idx];
+      map.setView([e.latitude, e.longitude], 14, { animate: true });
+      const marker = markers[idx];
+      if (marker) marker.openPopup();
+    });
+  });
+}
+
+function renderMarkers(data) {
+  markers.forEach((m) => map.removeLayer(m));
+  markers = data
+    .filter((e) => e.latitude && e.longitude)
+    .map((e) => {
+      const marker = L.marker([e.latitude, e.longitude], { icon: entrepreneurIcon }).addTo(map);
+      marker.bindPopup(popupHtml(e));
+      return marker;
+    });
+}
+
+async function loadMapData() {
+  const params = new URLSearchParams();
+  const search = document.getElementById('searchInput').value.trim();
+  const category = categoryFilter.value;
+  if (search) params.set('search', search);
+  if (category) params.set('category', category);
+  if (userLocation) { params.set('lat', userLocation.lat); params.set('lng', userLocation.lng); params.set('sort', 'distance'); }
+
+  try {
+    const data = await apiRequest(`/entrepreneurs?${params.toString()}`, { auth: false });
+    currentData = data.entrepreneurs;
+    renderMarkers(currentData);
+    renderList(currentData);
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+['searchInput'].forEach((id) => {
+  let t;
+  document.getElementById(id).addEventListener('input', () => {
+    clearTimeout(t);
+    t = setTimeout(loadMapData, 350);
+  });
+});
+categoryFilter.addEventListener('change', loadMapData);
+
+document.getElementById('nearMeBtn').addEventListener('click', async () => {
+  const status = document.getElementById('locationStatus');
+  status.textContent = 'Getting your location...';
+  try {
+    userLocation = await getCurrentLocation();
+    placeUserMarker(userLocation.lat, userLocation.lng);
+    status.textContent = 'Showing entrepreneurs nearest to your current location ✓';
+    loadMapData();
+  } catch (err) {
+    status.textContent = err.message;
+    document.getElementById('manualLocation').classList.remove('hidden');
+  }
+});
+
+function placeUserMarker(lat, lng) {
+  if (userMarker) map.removeLayer(userMarker);
+  userMarker = L.marker([lat, lng], { icon: userIcon }).addTo(map).bindPopup('You are here');
+  map.setView([lat, lng], 12);
+}
+
+// Manual location fallback using OpenStreetMap Nominatim geocoding (no API key required)
+document.getElementById('manualSearchBtn').addEventListener('click', async () => {
+  const q = document.getElementById('manualAddress').value.trim();
+  const status = document.getElementById('locationStatus');
+  if (!q) return;
+  status.textContent = 'Searching location...';
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`);
+    const results = await res.json();
+    if (!results.length) {
+      status.textContent = 'Location not found. Try a different search.';
+      return;
+    }
+    userLocation = { lat: parseFloat(results[0].lat), lng: parseFloat(results[0].lon) };
+    placeUserMarker(userLocation.lat, userLocation.lng);
+    status.textContent = `Showing entrepreneurs nearest to "${results[0].display_name.split(',')[0]}" ✓`;
+    loadMapData();
+  } catch (err) {
+    status.textContent = 'Could not search that location right now.';
+  }
+});
+
+loadMapData();
+</script>
+</body>
+</html>

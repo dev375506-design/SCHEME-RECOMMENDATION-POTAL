@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Dashboard — Udyam Setu</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="site-header"></div>
+
+<main id="main" class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
+  <div id="loadingState" class="text-center py-20" style="color:var(--color-muted)">Loading your dashboard...</div>
+
+  <div id="noProfileState" class="hidden text-center py-20 card p-10">
+    <h1 class="text-xl font-bold mb-2">You haven't registered a business yet</h1>
+    <p class="mb-6" style="color:var(--color-muted)">Create your business profile to appear in the directory and map.</p>
+    <a href="/register.html" class="btn btn-primary">Register your business</a>
+  </div>
+
+  <div id="dashboardContent" class="hidden">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+      <div>
+        <h1 class="text-2xl md:text-3xl font-bold mb-1">Welcome back, <span id="entName"></span></h1>
+        <p style="color:var(--color-muted)">Manage your business profile below.</p>
+      </div>
+      <span id="statusBadge"></span>
+    </div>
+
+    <div class="card p-5 mb-6">
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="font-semibold text-sm" style="color:var(--color-ink)">Profile completion</h3>
+        <span id="completionPct" class="font-bold text-sm" style="color:var(--color-saffron-dark)"></span>
+      </div>
+      <div class="w-full h-2 rounded-full" style="background:var(--color-border)">
+        <div id="completionBar" class="h-2 rounded-full" style="background:var(--color-saffron); width:0%"></div>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="md:col-span-2 card p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="font-semibold" style="color:var(--color-ink)">Business profile</h2>
+          <button id="editToggleBtn" class="btn btn-outline btn-sm">Edit profile</button>
+        </div>
+
+        <div id="viewMode" class="space-y-3 text-sm">
+          <p><strong>Business name:</strong> <span id="vBusinessName"></span></p>
+          <p><strong>Category:</strong> <span id="vCategory"></span></p>
+          <p><strong>Description:</strong> <span id="vDescription"></span></p>
+          <p><strong>Products/services:</strong> <span id="vProducts"></span></p>
+          <p><strong>Phone:</strong> <span id="vPhone"></span></p>
+          <p><strong>Address:</strong> <span id="vAddress"></span></p>
+          <p><strong>Location (lat, lng):</strong> <span id="vLocation"></span></p>
+          <p><a id="vProfileLink" href="#" class="btn btn-primary btn-sm mt-2 inline-flex">View public profile →</a></p>
+        </div>
+
+        <form id="editForm" class="hidden grid sm:grid-cols-2 gap-4">
+          <div class="sm:col-span-2">
+            <label class="field-label">Business name</label>
+            <input class="field-input" id="eBusinessName" required>
+          </div>
+          <div>
+            <label class="field-label">Category</label>
+            <select class="field-select" id="eCategory"></select>
+          </div>
+          <div>
+            <label class="field-label">Phone</label>
+            <input class="field-input" id="ePhone" maxlength="10">
+          </div>
+          <div class="sm:col-span-2">
+            <label class="field-label">Description</label>
+            <textarea class="field-textarea" id="eDescription" rows="3"></textarea>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="field-label">Products / services</label>
+            <input class="field-input" id="eProducts">
+          </div>
+          <div class="sm:col-span-2">
+            <label class="field-label">Address</label>
+            <input class="field-input" id="eAddress">
+          </div>
+          <div>
+            <label class="field-label">District</label>
+            <input class="field-input" id="eDistrict">
+          </div>
+          <div>
+            <label class="field-label">State</label>
+            <input class="field-input" id="eState">
+          </div>
+          <div>
+            <label class="field-label">Pincode</label>
+            <input class="field-input" id="ePincode" maxlength="6">
+          </div>
+          <div>
+            <label class="field-label">Business status</label>
+            <select class="field-select" id="eStatus">
+              <option value="active">Currently active</option>
+              <option value="starting">Just starting out</option>
+              <option value="paused">Temporarily paused</option>
+            </select>
+          </div>
+          <div id="editError" class="field-error sm:col-span-2 hidden"></div>
+          <div class="sm:col-span-2 flex gap-2">
+            <button type="submit" class="btn btn-primary">Save changes</button>
+            <button type="button" id="cancelEditBtn" class="btn btn-outline">Cancel</button>
+          </div>
+          <p class="sm:col-span-2 field-hint">Editing your profile will send it back for admin re-verification.</p>
+        </form>
+      </div>
+
+      <div>
+        <div class="card p-6 mb-4">
+          <h3 class="font-semibold mb-3" style="color:var(--color-ink)">Recommended for you</h3>
+          <div id="recommendedSchemes" class="space-y-3 text-sm"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+
+<script src="/js/api.js"></script>
+<script src="/js/nav.js"></script>
+<script>
+if (!Auth.isLoggedIn()) window.location.href = '/login.html';
+
+let currentProfile = null;
+
+function statusBadgeHtml(status) {
+  if (status === 'verified') return '<span class="badge badge-verified">✓ Verified</span>';
+  if (status === 'rejected') return '<span class="badge badge-rejected">Rejected — please edit and resubmit</span>';
+  return '<span class="badge badge-pending">Pending verification</span>';
+}
+
+function computeCompletion(e) {
+  const fields = ['businessName', 'entrepreneurName', 'phone', 'category', 'description', 'productsServices', 'address', 'district', 'state', 'pincode', 'latitude', 'longitude', 'image', 'socialLink'];
+  const filled = fields.filter((f) => e[f] !== undefined && e[f] !== null && String(e[f]).trim() !== '').length;
+  return Math.round((filled / fields.length) * 100);
+}
+
+function renderView(e) {
+  document.getElementById('entName').textContent = e.entrepreneurName;
+  document.getElementById('statusBadge').innerHTML = statusBadgeHtml(e.verificationStatus);
+  const pct = computeCompletion(e);
+  document.getElementById('completionPct').textContent = `${pct}%`;
+  document.getElementById('completionBar').style.width = `${pct}%`;
+
+  document.getElementById('vBusinessName').textContent = e.businessName;
+  document.getElementById('vCategory').textContent = e.category;
+  document.getElementById('vDescription').textContent = e.description;
+  document.getElementById('vProducts').textContent = e.productsServices || '—';
+  document.getElementById('vPhone').textContent = e.phone;
+  document.getElementById('vAddress').textContent = `${e.address}, ${e.district}, ${e.state} - ${e.pincode}`;
+  document.getElementById('vLocation').textContent = e.latitude && e.longitude ? `${e.latitude}, ${e.longitude}` : 'Not set';
+  document.getElementById('vProfileLink').href = `/profile.html?id=${e.id}`;
+}
+
+async function loadRecommendations(category) {
+  try {
+    const { schemes } = await apiRequest(`/schemes?category=${encodeURIComponent(category)}`, { auth: false });
+    const el = document.getElementById('recommendedSchemes');
+    el.innerHTML = schemes.length
+      ? schemes.slice(0, 4).map((s) => `<div class="p-3 rounded-lg" style="border:1px solid var(--color-border);"><p class="font-semibold text-sm">${s.name}</p><p class="text-xs mt-1" style="color:var(--color-muted)">${s.benefits}</p></div>`).join('')
+      : '<p class="text-xs" style="color:var(--color-muted)">No schemes matched yet.</p>';
+  } catch {}
+}
+
+async function loadDashboard() {
+  try {
+    const { entrepreneur } = await apiRequest('/entrepreneurs/me');
+    if (!entrepreneur) {
+      document.getElementById('loadingState').classList.add('hidden');
+      document.getElementById('noProfileState').classList.remove('hidden');
+      return;
+    }
+    currentProfile = entrepreneur;
+    document.getElementById('loadingState').classList.add('hidden');
+    document.getElementById('dashboardContent').classList.remove('hidden');
+    renderView(entrepreneur);
+    loadRecommendations(entrepreneur.category);
+  } catch (err) {
+    if (err.status === 401) { Auth.logout(); return; }
+    showToast(err.message, 'error');
+  }
+}
+
+const editCategorySelect = document.getElementById('eCategory');
+CATEGORIES.forEach((c) => {
+  const opt = document.createElement('option');
+  opt.value = c; opt.textContent = c;
+  editCategorySelect.appendChild(opt);
+});
+
+document.getElementById('editToggleBtn').addEventListener('click', () => {
+  const e = currentProfile;
+  document.getElementById('eBusinessName').value = e.businessName;
+  editCategorySelect.value = e.category;
+  document.getElementById('ePhone').value = e.phone;
+  document.getElementById('eDescription').value = e.description;
+  document.getElementById('eProducts').value = e.productsServices || '';
+  document.getElementById('eAddress').value = e.address;
+  document.getElementById('eDistrict').value = e.district;
+  document.getElementById('eState').value = e.state;
+  document.getElementById('ePincode').value = e.pincode;
+  document.getElementById('eStatus').value = e.businessStatus || 'active';
+
+  document.getElementById('viewMode').classList.add('hidden');
+  document.getElementById('editForm').classList.remove('hidden');
+});
+
+document.getElementById('cancelEditBtn').addEventListener('click', () => {
+  document.getElementById('editForm').classList.add('hidden');
+  document.getElementById('viewMode').classList.remove('hidden');
+});
+
+document.getElementById('editForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const errorEl = document.getElementById('editError');
+  errorEl.classList.add('hidden');
+  const body = {
+    businessName: document.getElementById('eBusinessName').value.trim(),
+    category: editCategorySelect.value,
+    phone: document.getElementById('ePhone').value.trim(),
+    description: document.getElementById('eDescription').value.trim(),
+    productsServices: document.getElementById('eProducts').value.trim(),
+    address: document.getElementById('eAddress').value.trim(),
+    district: document.getElementById('eDistrict').value.trim(),
+    state: document.getElementById('eState').value.trim(),
+    pincode: document.getElementById('ePincode').value.trim(),
+    businessStatus: document.getElementById('eStatus').value,
+  };
+  try {
+    const { entrepreneur } = await apiRequest(`/entrepreneurs/${currentProfile.id}`, { method: 'PUT', body });
+    currentProfile = entrepreneur;
+    renderView(entrepreneur);
+    loadRecommendations(entrepreneur.category);
+    document.getElementById('editForm').classList.add('hidden');
+    document.getElementById('viewMode').classList.remove('hidden');
+    showToast('Profile updated. It will be re-verified by an admin.', 'success');
+  } catch (err) {
+    errorEl.textContent = err.message;
+    errorEl.classList.remove('hidden');
+  }
+});
+
+loadDashboard();
+</script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Government Schemes — Udyam Setu</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="site-header"></div>
+
+<main id="main" class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
+  <h1 class="text-2xl md:text-3xl font-bold mb-1">Government schemes &amp; support</h1>
+  <p class="mb-6" style="color:var(--color-muted)">Seeded reference data for this prototype. Always confirm details on the official portal before applying.</p>
+
+  <div class="flex flex-wrap gap-2 mb-8" id="categoryChips"></div>
+
+  <div id="schemesList" class="grid gap-5"></div>
+</main>
+
+<div id="site-footer"></div>
+
+<script src="/js/api.js"></script>
+<script src="/js/nav.js"></script>
+<script>
+let activeCategory = '';
+
+function chip(label, value) {
+  const el = document.createElement('button');
+  el.className = 'btn btn-sm ' + (value === activeCategory ? 'btn-primary' : 'btn-outline');
+  el.textContent = label;
+  el.addEventListener('click', () => { activeCategory = value; loadSchemes(); renderChips(); });
+  return el;
+}
+
+function renderChips() {
+  const wrap = document.getElementById('categoryChips');
+  wrap.innerHTML = '';
+  wrap.appendChild(chip('All categories', ''));
+  CATEGORIES.forEach((c) => wrap.appendChild(chip(c, c)));
+}
+
+function schemeCard(s) {
+  return `
+    <div class="card p-6">
+      <div class="flex items-start justify-between gap-3 flex-wrap mb-2">
+        <h2 class="font-bold text-lg" style="color:var(--color-ink)">${s.name}</h2>
+        <div class="flex flex-wrap gap-1">
+          ${s.categories.map((c) => `<span class="badge" style="background:#F3F7F5;color:var(--color-ink)">${c}</span>`).join('')}
+        </div>
+      </div>
+      <p class="text-sm mb-4" style="color:var(--color-text)">${s.description}</p>
+      <div class="grid sm:grid-cols-3 gap-4 text-sm">
+        <div><h3 class="font-semibold text-xs uppercase tracking-wide mb-1" style="color:var(--color-muted)">Eligibility</h3><p style="color:var(--color-text)">${s.eligibility || '—'}</p></div>
+        <div><h3 class="font-semibold text-xs uppercase tracking-wide mb-1" style="color:var(--color-muted)">Benefits</h3><p style="color:var(--color-text)">${s.benefits || '—'}</p></div>
+        <div><h3 class="font-semibold text-xs uppercase tracking-wide mb-1" style="color:var(--color-muted)">Documents needed</h3><p style="color:var(--color-text)">${s.documents || '—'}</p></div>
+      </div>
+      <div class="mt-4">
+        ${s.officialUrl
+          ? `<a href="${s.officialUrl}" target="_blank" rel="noopener" class="btn btn-primary btn-sm">Official application page →</a>`
+          : `<span class="text-xs" style="color:var(--color-muted)">Official application link not available yet — search the scheme name on india.gov.in.</span>`}
+      </div>
+    </div>
+  `;
+}
+
+async function loadSchemes() {
+  try {
+    const params = activeCategory ? `?category=${encodeURIComponent(activeCategory)}` : '';
+    const { schemes } = await apiRequest(`/schemes${params}`, { auth: false });
+    document.getElementById('schemesList').innerHTML = schemes.length
+      ? schemes.map(schemeCard).join('')
+      : '<p class="text-center py-10" style="color:var(--color-muted)">No schemes found for this category yet.</p>';
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+renderChips();
+loadSchemes();
+</script>
+</body>
+</html>

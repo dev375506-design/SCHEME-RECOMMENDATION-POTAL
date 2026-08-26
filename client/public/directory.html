@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Find Entrepreneurs — Udyam Setu</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="site-header"></div>
+
+<main id="main" class="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+  <div class="flex flex-wrap items-end justify-between gap-3 mb-6">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-bold mb-1">Find local entrepreneurs</h1>
+      <p style="color:var(--color-muted)">Browse verified and pending businesses across categories, states and districts.</p>
+    </div>
+    <a href="/map.html" class="btn btn-outline btn-sm">View on map →</a>
+  </div>
+
+  <!-- Filters -->
+  <div class="card p-4 mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+    <input id="searchInput" class="field-input lg:col-span-2" placeholder="Search business, product or service...">
+    <select id="categoryFilter" class="field-select"><option value="">All categories</option></select>
+    <input id="stateFilter" class="field-input" placeholder="State">
+    <input id="districtFilter" class="field-input" placeholder="District">
+    <select id="sortFilter" class="field-select">
+      <option value="newest">Newest first</option>
+      <option value="name">Name (A–Z)</option>
+      <option value="distance">Nearest to me</option>
+    </select>
+    <div class="lg:col-span-6 flex flex-wrap gap-3 items-center">
+      <button id="nearMeBtn" class="btn btn-green btn-sm">📍 Near me</button>
+      <span id="locationInfo" class="text-xs" style="color:var(--color-muted)"></span>
+      <button id="clearFiltersBtn" class="btn btn-outline btn-sm ml-auto">Clear filters</button>
+    </div>
+  </div>
+
+  <p id="resultCount" class="text-sm mb-4" style="color:var(--color-muted)"></p>
+  <div id="cardsGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+  <p id="emptyState" class="hidden text-center py-16" style="color:var(--color-muted)">No entrepreneurs match these filters yet. Try clearing a filter.</p>
+</main>
+
+<div id="site-footer"></div>
+
+<script src="/js/api.js"></script>
+<script src="/js/nav.js"></script>
+<script src="/js/geo.js"></script>
+<script>
+const categoryFilter = document.getElementById('categoryFilter');
+CATEGORIES.forEach((c) => {
+  const opt = document.createElement('option');
+  opt.value = c; opt.textContent = c;
+  categoryFilter.appendChild(opt);
+});
+
+let userLocation = null;
+
+function statusBadge(status) {
+  if (status === 'verified') return '<span class="badge badge-verified">✓ Verified</span>';
+  if (status === 'rejected') return '<span class="badge badge-rejected">Rejected</span>';
+  return '<span class="badge badge-pending">Pending review</span>';
+}
+
+function card(e) {
+  const img = e.image
+    ? `<img src="${e.image}" alt="${e.businessName}" class="w-full h-40 object-cover rounded-t-2xl">`
+    : `<div class="w-full h-40 rounded-t-2xl flex items-center justify-center text-4xl" style="background:#EFE8D8;">🛍️</div>`;
+  const dist = (e.distanceKm !== null && e.distanceKm !== undefined) ? `<span class="text-xs" style="color:var(--color-green)">${e.distanceKm} km away</span>` : '';
+  return `
+    <div class="card overflow-hidden flex flex-col">
+      ${img}
+      <div class="p-5 flex flex-col flex-1">
+        <div class="flex items-start justify-between gap-2 mb-1">
+          <h3 class="font-semibold" style="color:var(--color-ink)">${e.businessName}</h3>
+          ${statusBadge(e.verificationStatus)}
+        </div>
+        <p class="text-xs mb-2" style="color:var(--color-muted)">${e.entrepreneurName} · ${e.category}</p>
+        <p class="text-sm mb-3 line-clamp-3" style="color:var(--color-text)">${e.description}</p>
+        <p class="text-xs mb-4" style="color:var(--color-muted)">📍 ${e.district}, ${e.state} ${dist}</p>
+        <div class="mt-auto flex gap-2">
+          <a href="/profile.html?id=${e.id}" class="btn btn-outline btn-sm flex-1">View Profile</a>
+          <a href="tel:${e.phone}" class="btn btn-primary btn-sm flex-1">Contact</a>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function loadDirectory() {
+  const params = new URLSearchParams();
+  const search = document.getElementById('searchInput').value.trim();
+  const category = categoryFilter.value;
+  const state = document.getElementById('stateFilter').value.trim();
+  const district = document.getElementById('districtFilter').value.trim();
+  const sort = document.getElementById('sortFilter').value;
+
+  if (search) params.set('search', search);
+  if (category) params.set('category', category);
+  if (state) params.set('state', state);
+  if (district) params.set('district', district);
+  if (sort) params.set('sort', sort);
+  if (userLocation) { params.set('lat', userLocation.lat); params.set('lng', userLocation.lng); }
+
+  try {
+    const data = await apiRequest(`/entrepreneurs?${params.toString()}`, { auth: false });
+    const grid = document.getElementById('cardsGrid');
+    const empty = document.getElementById('emptyState');
+    document.getElementById('resultCount').textContent = `${data.count} entrepreneur${data.count === 1 ? '' : 's'} found`;
+    if (!data.entrepreneurs.length) {
+      grid.innerHTML = '';
+      empty.classList.remove('hidden');
+    } else {
+      empty.classList.add('hidden');
+      grid.innerHTML = data.entrepreneurs.map(card).join('');
+    }
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+['searchInput', 'stateFilter', 'districtFilter'].forEach((id) => {
+  let t;
+  document.getElementById(id).addEventListener('input', () => {
+    clearTimeout(t);
+    t = setTimeout(loadDirectory, 350);
+  });
+});
+categoryFilter.addEventListener('change', loadDirectory);
+document.getElementById('sortFilter').addEventListener('change', loadDirectory);
+
+document.getElementById('nearMeBtn').addEventListener('click', async () => {
+  const info = document.getElementById('locationInfo');
+  info.textContent = 'Getting your location...';
+  try {
+    userLocation = await getCurrentLocation();
+    info.textContent = 'Sorted by distance from your current location ✓';
+    document.getElementById('sortFilter').value = 'distance';
+    loadDirectory();
+  } catch (err) {
+    info.textContent = err.message;
+  }
+});
+
+document.getElementById('clearFiltersBtn').addEventListener('click', () => {
+  document.getElementById('searchInput').value = '';
+  categoryFilter.value = '';
+  document.getElementById('stateFilter').value = '';
+  document.getElementById('districtFilter').value = '';
+  document.getElementById('sortFilter').value = 'newest';
+  userLocation = null;
+  document.getElementById('locationInfo').textContent = '';
+  loadDirectory();
+});
+
+loadDirectory();
+</script>
+</body>
+</html>

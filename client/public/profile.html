@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Business Profile — Udyam Setu</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="/css/style.css">
+<style>#profileMap { height: 260px; border-radius: var(--radius); z-index: 0; }</style>
+</head>
+<body>
+<div id="site-header"></div>
+
+<main id="main" class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
+  <div id="loadingState" class="text-center py-20" style="color:var(--color-muted)">Loading profile...</div>
+  <div id="notFoundState" class="hidden text-center py-20">
+    <h1 class="text-xl font-bold mb-2">Profile not found</h1>
+    <a href="/directory.html" class="btn btn-primary">Back to directory</a>
+  </div>
+
+  <div id="profileContent" class="hidden">
+    <a href="/directory.html" class="text-sm inline-block mb-4" style="color:var(--color-muted)">← Back to directory</a>
+
+    <div class="grid md:grid-cols-3 gap-8">
+      <div class="md:col-span-2">
+        <div class="card overflow-hidden mb-6">
+          <div id="profileImageWrap"></div>
+          <div class="p-6">
+            <div class="flex items-start justify-between gap-3 flex-wrap">
+              <div>
+                <h1 id="businessName" class="text-2xl font-bold mb-1"></h1>
+                <p id="entrepreneurCategory" class="text-sm" style="color:var(--color-muted)"></p>
+              </div>
+              <span id="statusBadge"></span>
+            </div>
+            <p id="description" class="mt-4 leading-relaxed" style="color:var(--color-text)"></p>
+            <div class="mt-5">
+              <h3 class="font-semibold text-sm mb-1" style="color:var(--color-ink)">Products / services</h3>
+              <p id="productsServices" class="text-sm" style="color:var(--color-muted)"></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card p-6 mb-6">
+          <h3 class="font-semibold mb-3" style="color:var(--color-ink)">Location</h3>
+          <p id="address" class="text-sm mb-3" style="color:var(--color-muted)"></p>
+          <div id="profileMap"></div>
+        </div>
+
+        <div class="card p-6">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-semibold" style="color:var(--color-ink)">Recommended for this business</h3>
+            <span class="text-xs" style="color:var(--color-muted)">Based on category match</span>
+          </div>
+          <div id="recommendedSchemes" class="grid sm:grid-cols-2 gap-3"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card p-6 sticky top-20">
+          <h3 class="font-semibold mb-4" style="color:var(--color-ink)">Contact</h3>
+          <div class="flex flex-col gap-2">
+            <a id="callBtn" class="btn btn-primary" href="#">📞 Call</a>
+            <a id="whatsappBtn" class="btn btn-green hidden" href="#" target="_blank" rel="noopener">💬 WhatsApp</a>
+            <button id="shareBtn" class="btn btn-outline">🔗 Share profile</button>
+          </div>
+          <div class="mt-6 text-sm space-y-2" style="color:var(--color-muted)">
+            <p id="emailRow" class="hidden"></p>
+            <p id="socialRow" class="hidden"></p>
+            <p id="statusRow"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+
+<script src="/js/api.js"></script>
+<script src="/js/nav.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const id = qs('id');
+
+function statusBadgeHtml(status) {
+  if (status === 'verified') return '<span class="badge badge-verified">✓ Verified business</span>';
+  if (status === 'rejected') return '<span class="badge badge-rejected">Not verified</span>';
+  return '<span class="badge badge-pending">Verification pending</span>';
+}
+
+function schemeCard(s) {
+  return `
+    <div class="p-3 rounded-lg" style="border:1px solid var(--color-border);">
+      <p class="font-semibold text-sm mb-1">${s.name}</p>
+      <p class="text-xs mb-2" style="color:var(--color-muted)">${s.benefits}</p>
+      ${s.officialUrl ? `<a href="${s.officialUrl}" target="_blank" rel="noopener" class="text-xs font-semibold" style="color:var(--color-saffron-dark)">Official page →</a>` : '<span class="text-xs" style="color:var(--color-muted)">Official link not available</span>'}
+    </div>
+  `;
+}
+
+async function loadProfile() {
+  if (!id) {
+    document.getElementById('loadingState').classList.add('hidden');
+    document.getElementById('notFoundState').classList.remove('hidden');
+    return;
+  }
+  try {
+    const { entrepreneur: e } = await apiRequest(`/entrepreneurs/${id}`, { auth: false });
+    document.getElementById('loadingState').classList.add('hidden');
+    document.getElementById('profileContent').classList.remove('hidden');
+
+    document.getElementById('businessName').textContent = e.businessName;
+    document.getElementById('entrepreneurCategory').textContent = `${e.entrepreneurName} · ${e.category}`;
+    document.getElementById('statusBadge').innerHTML = statusBadgeHtml(e.verificationStatus);
+    document.getElementById('description').textContent = e.description;
+    document.getElementById('productsServices').textContent = e.productsServices || 'Not specified';
+    document.getElementById('address').textContent = `${e.address}, ${e.district}, ${e.state} - ${e.pincode}`;
+    document.getElementById('statusRow').textContent = `Business status: ${e.businessStatus === 'active' ? 'Currently active' : e.businessStatus === 'starting' ? 'Just starting out' : 'Temporarily paused'}`;
+
+    document.getElementById('profileImageWrap').innerHTML = e.image
+      ? `<img src="${e.image}" alt="${e.businessName}" class="w-full h-56 object-cover">`
+      : `<div class="w-full h-56 flex items-center justify-center text-6xl" style="background:#EFE8D8;">🛍️</div>`;
+
+    document.getElementById('callBtn').href = `tel:${e.phone}`;
+    if (e.phone) {
+      const wa = document.getElementById('whatsappBtn');
+      wa.href = `https://wa.me/91${e.phone}`;
+      wa.classList.remove('hidden');
+    }
+    if (e.email) {
+      const row = document.getElementById('emailRow');
+      row.textContent = `Email: ${e.email}`;
+      row.classList.remove('hidden');
+    }
+    if (e.socialLink) {
+      const row = document.getElementById('socialRow');
+      row.innerHTML = `Social: <a href="${e.socialLink}" target="_blank" rel="noopener" class="underline">${e.socialLink}</a>`;
+      row.classList.remove('hidden');
+    }
+
+    document.getElementById('shareBtn').addEventListener('click', async () => {
+      const url = window.location.href;
+      if (navigator.share) {
+        try { await navigator.share({ title: e.businessName, url }); return; } catch {}
+      }
+      await navigator.clipboard.writeText(url);
+      showToast('Profile link copied to clipboard!', 'success');
+    });
+
+    if (e.latitude && e.longitude) {
+      const map = L.map('profileMap', { scrollWheelZoom: false }).setView([e.latitude, e.longitude], 14);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+      }).addTo(map);
+      const icon = L.divIcon({
+        className: 'entrepreneur-pin',
+        html: `<div style="background:#E2872F;width:16px;height:16px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid white;"></div>`,
+        iconSize: [16, 16], iconAnchor: [8, 16],
+      });
+      L.marker([e.latitude, e.longitude], { icon }).addTo(map).bindPopup(e.businessName).openPopup();
+    } else {
+      document.getElementById('profileMap').innerHTML = '<p class="text-sm" style="color:var(--color-muted)">Location not available.</p>';
+    }
+
+    try {
+      const { schemes } = await apiRequest(`/schemes?category=${encodeURIComponent(e.category)}`, { auth: false });
+      const container = document.getElementById('recommendedSchemes');
+      container.innerHTML = schemes.length
+        ? schemes.slice(0, 4).map(schemeCard).join('')
+        : '<p class="text-sm col-span-2" style="color:var(--color-muted)">No matching schemes found yet.</p>';
+    } catch {}
+  } catch (err) {
+    document.getElementById('loadingState').classList.add('hidden');
+    document.getElementById('notFoundState').classList.remove('hidden');
+  }
+}
+
+loadProfile();
+</script>
+</body>
+</html>

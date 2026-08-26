@@ -1,0 +1,110 @@
+[
+  {
+    "id": "mta62r0qctzqdjec",
+    "createdAt": "2026-08-26T14:06:05.642Z",
+    "name": "Portal Admin",
+    "phone": "9999999999",
+    "email": "admin@entrepreneurs-portal.gov.in",
+    "passwordHash": "abf2814a57c08480a0cb2ea860b7f56a:9df675dc087c799a081d7d89e3324945bed0f54ef7effd81fb4a100bd2d50f5aa6a80b0e2237a88481bbb217a32a59b1a8dcb7e9aebf66c611d25e50a9722555",
+    "role": "admin"
+  },
+  {
+    "id": "mta62r22ajuxy0za",
+    "createdAt": "2026-08-26T14:06:05.690Z",
+    "name": "Meera Solanki",
+    "phone": "9820011122",
+    "email": "",
+    "passwordHash": "2e762160253c92b2368525ca222a4937:c25dc27cb20216bf06775f36096fd64b94ba2658889a980f22940ad5917c122bdc410adeff1c601a7a6d204d5ffc5c1e707f51ae67f03b17b0feb320ed73530c",
+    "role": "entrepreneur"
+  },
+  {
+    "id": "mta62r3dk7fcfnbz",
+    "createdAt": "2026-08-26T14:06:05.737Z",
+    "name": "Rekha Patel",
+    "phone": "9820011123",
+    "email": "",
+    "passwordHash": "c11f191b0849038db06e2fb06430adfb:4e5e99dc919379e853ea01272910059751721680f691d82d9bed2158d2ac87c524258144d84b708c2fdc7dc7e68125f29125e9e23119d0b4005a55e50be66c2f",
+    "role": "entrepreneur"
+  },
+  {
+    "id": "mta62r4p0frsmh4p",
+    "createdAt": "2026-08-26T14:06:05.785Z",
+    "name": "Anil Kumhar",
+    "phone": "9820011124",
+    "email": "",
+    "passwordHash": "1dd55e38e531d2d49e967bcecd3d5019:5931ca8a0c818c3471ad494e612fae1eb5f4c128888f12c90c82445a8a4ad20223215eb465e76d8b1b0fc4f19eb600dcddb071b36fa1281eede2179119eb5f6e",
+    "role": "entrepreneur"
+  },
+  {
+    "id": "mta62r64vo0xp3u6",
+    "createdAt": "2026-08-26T14:06:05.836Z",
+    "name": "Salim Khan",
+    "phone": "9820011125",
+    "email": "",
+    "passwordHash": "8444a6aba1ea0c602e1767109f81ce73:c3277261d3c89c681b2929446476b7a13a7f58c2e150e429cd3939deae095e5b7a6ee12291e3ebfa3625fbfa49a1adfb95fc5e27dbb77fedd0e0eb23ce2681c6",
+    "role": "entrepreneur"
+  },
+  {
+    "id": "mta62r7ld3ppo0ja",
+    "createdAt": "2026-08-26T14:06:05.889Z",
+    "name": "Iqbal Ansari",
+    "phone": "9820011126",
+    "email": "",
+    "passwordHash": "f854c1c8d3de6db746c594f8a4a62896:e7d8ec76b54e3c055c34234654d1060e5c43e9b98396f573b57751d046d8965460823818b616114602528eaf6cc0487c03685528aad308d49283482e9eccc3a3",
+    "role": "entrepreneur"
+  },
+  {
+    "id": "mta62r9272n7v6a2",
+    "createdAt": "2026-08-26T14:06:05.942Z",
+    "name": "Suresh Jadhav",
+    "phone": "9820011127",
+    "email": "",
+    "passwordHash": "d123ec406e6a969b7d3853b4b72ec322:1b71d1b45e53dc6d7269258cb2d86b546ecb5f818d6d353f8e65e6d23c8dd75247314bbcc5ac1c34c5b0a10509ca09e10b9a0aa96a90dbf8174b59fad3f1ef3f",
+    "role": "entrepreneur"
+  },
+  {
+    "id": "mta62ragikdb06m9",
+    "createdAt": "2026-08-26T14:06:05.992Z",
+    "name": "Muthu Selvam",
+    "phone": "9820011128",
+    "email": "",
+    "passwordHash": "fce778f904bfc2045353e14c6b39be98:e01b00bf5ac86ce3b92a4439f278b420990bb0525d762a1a73d091a8c918db9fab0f4fdc57042093c923f148dadb411c606c37f190df090e0a41de861c406cb1",
+    "role": "entrepreneur"
+  },
+  {
+    "id": "mta62rbvs3tn52hc",
+    "createdAt": "2026-08-26T14:06:06.043Z",
+    "name": "Beena Thomas",
+    "phone": "9820011129",
+    "email": "",
+    "passwordHash": "5c0f4d35d9100154796f0f06f4659480:1833ce160326e23a91ba972090e586f877162feb2475beabcd6bcf0f27c885dcb509fdacdaac43401cf68501fa62754ec7b7630873ce4335e6bba293b11c46ce",
+    "role": "entrepreneur"
+  },
+  {
+    "id": "mta62rd9k2zl4r1o",
+    "createdAt": "2026-08-26T14:06:06.093Z",
+    "name": "Rekha Uikey",
+    "phone": "9820011130",
+    "email": "",
+    "passwordHash": "a59e3212c2d27f8412bd50f89aa7d0f9:ae20b7ff60bf0fc23ac0b50fc9dba8834e5afa97880554632e36b24275bd5a2f4a2df6930f16e7b6f82119f73094f15afd39221cfdf80693609eb05e7a9280ce",
+    "role": "entrepreneur"
+  },
+  {
+    "id": "mta62remt0ekuac0",
+    "createdAt": "2026-08-26T14:06:06.142Z",
+    "name": "Diganta Bora",
+    "phone": "9820011131",
+    "email": "",
+    "passwordHash": "bfb71c5442565481794220665c3357d9:d45dfc8c15ae4d4db2094c21eba82746feeae61a96857c14ef61fc090ddc8fd2b0b0a24db851b6401fa18c0d934df848eb1ecbbd6f14ae335235e86a37745455",
+    "role": "entrepreneur"
+  },
+  {
+    "id": "mta63pyavobof3gm",
+    "createdAt": "2026-08-26T14:06:50.914Z",
+    "name": "dev",
+    "phone": "9106799689",
+    "email": "",
+    "passwordHash": "34a11766b048fb2f5f44986bdde799f7:4da268fbc0b79e1a343e7b79db0964ac539b38893627f8fae740ab8fc3e6ced851006f1291703c38c0aa040556469b137b390770cd8cd125936b2cf2803148d5",
+    "role": "entrepreneur"
+  }
+]
