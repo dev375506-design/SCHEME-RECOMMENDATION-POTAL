@@ -133,5 +133,23 @@
     "email": "",
     "passwordHash": "74cf817d4a189cea776064dc1223963a:b8c6d959996368b433b23625281f48d2b334448730ebb8821670bb05b9e7b84ca8f3237b8c53c27bf92c74f68c24dab20d5c372a1c291a0bf40f92780904aeba",
     "role": "entrepreneur"
+  },
+  {
+    "id": "mtabuzlobvzn8ej0",
+    "createdAt": "2026-08-26T16:48:01.212Z",
+    "name": "Register Test 2026",
+    "phone": "8888777766",
+    "email": "test@example.com",
+    "passwordHash": "1e6e96502d884b19e6e5eec2d356513b:3c5ffb156bf54ccb6ea1be1d4d5f22e17d4c705f63a7e941680bd558debcbb7880659647d52b476cfb3942076a9fece21e5500d43e55ab1c5cd65331005c7c7f",
+    "role": "entrepreneur"
+  },
+  {
+    "id": "mtabwugoyzmmolif",
+    "createdAt": "2026-08-26T16:49:27.864Z",
+    "name": "Test User 2027",
+    "phone": "9999888877",
+    "email": "test2@example.com",
+    "passwordHash": "cfc5ff9d95ba69b015eafa505e2dd7a6:0a6b8a47daf433c0341f6e9456ed5fe9ea3ea386bdef3b96ab562c9252beabcb457ea8f2598fe9693f42b9805c9437c1f7844f158adf79194763d340fcd1c2fd",
+    "role": "entrepreneur"
   }
 ]

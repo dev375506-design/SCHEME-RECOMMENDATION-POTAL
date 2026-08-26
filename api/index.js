@@ -102,7 +102,9 @@ module.exports = async (req, res) => {
     return sendJSON(res, 404, { error: 'API route not found.' });
 
   } catch (e) {
-    console.error('[API Error]', e);
-    return sendJSON(res, 500, { error: 'Internal server error.' });
+    // Log the full error stack for debugging (without sensitive data)
+    console.error('[API Error]', e.message);
+    console.error('[Stack]', e.stack);
+    return sendJSON(res, 500, { error: 'Internal server error.', message: e.message });
   }
 };
