@@ -106,5 +106,23 @@
     "email": "",
     "passwordHash": "34a11766b048fb2f5f44986bdde799f7:4da268fbc0b79e1a343e7b79db0964ac539b38893627f8fae740ab8fc3e6ced851006f1291703c38c0aa040556469b137b390770cd8cd125936b2cf2803148d5",
     "role": "entrepreneur"
+  },
+  {
+    "id": "mtab89lljvefhg62",
+    "createdAt": "2026-08-26T16:30:21.081Z",
+    "name": "Test Registration",
+    "phone": "5555555555",
+    "email": "test@example.com",
+    "passwordHash": "c90ef50cec7c417d002405f52af5a0de:6b670e6d2c808fdbf75527ec0d89d21556d3d1725beeabba1615266ea6898c95fabd8f7db57b58e1ef8a594fff363d410d67cd71797ad0bf3cdc306305308f1a",
+    "role": "entrepreneur"
+  },
+  {
+    "id": "mtab8u8oqksp9yog",
+    "createdAt": "2026-08-26T16:30:47.832Z",
+    "name": "Vercel Test User",
+    "phone": "7777777777",
+    "email": "vercel@test.com",
+    "passwordHash": "b6bb79b28eea89aa1ccb9880cedfd941:8d344ed2550872264107dbd5c109b3455d9675d760c135e978dbcd70ddab52aecfe5dd4aa5203ad2ac671ed6b1c1bf895000e569ce6e05a825802519af951845",
+    "role": "entrepreneur"
   }
 ]

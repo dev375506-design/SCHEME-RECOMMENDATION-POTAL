@@ -1,15 +1,29 @@
 {
   "version": 2,
-  "buildCommand": "node server/seed.js",
-  "public": "client/public",
   "rewrites": [
     {
       "source": "/api/(.*)",
       "destination": "/api"
     },
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "source": "/(.*).html",
+      "destination": "/client/public/$1.html"
+    },
+    {
+      "source": "/css/(.*)",
+      "destination": "/client/public/css/$1"
+    },
+    {
+      "source": "/js/(.*)",
+      "destination": "/client/public/js/$1"
+    },
+    {
+      "source": "/img/(.*)",
+      "destination": "/client/public/img/$1"
+    },
+    {
+      "source": "/$",
+      "destination": "/client/public/index.html"
     }
   ],
   "headers": [

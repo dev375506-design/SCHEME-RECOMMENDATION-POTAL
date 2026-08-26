@@ -56,19 +56,24 @@ module.exports = async (req, res) => {
     // Parse the request body for POST/PUT requests
     const body = ['POST', 'PUT'].includes(method) ? await readBody(req) : {};
 
-    // Parse URL segments: /api/entrepreneurs/123 -> ['', 'api', 'entrepreneurs', '123']
-    const segments = pathname.split('/').filter(Boolean); // ['api', 'entrepreneurs', '123']
+    // Parse URL segments: /api/auth/register -> ['api', 'auth', 'register']
+    let segments = pathname.split('/').filter(Boolean);
+    
+    // Remove 'api' prefix if present (Vercel routes /api/* to this handler)
+    if (segments[0] === 'api') {
+      segments = segments.slice(1); // Now: ['auth', 'register']
+    }
 
     // Route handling (reuse existing route logic)
 
-    // /api/auth/*
+    // /auth/*
     if (segments[0] === 'auth') {
       if (method === 'POST' && segments[1] === 'register') return authRoutes.register(req, res, body);
       if (method === 'POST' && segments[1] === 'login') return authRoutes.login(req, res, body);
       if (method === 'GET' && segments[1] === 'me') return authRoutes.me(req, res);
     }
 
-    // /api/entrepreneurs*
+    // /entrepreneurs*
     if (segments[0] === 'entrepreneurs') {
       if (method === 'GET' && segments.length === 1) return entrepreneurRoutes.list(req, res, query);
       if (method === 'GET' && segments[1] === 'me') return entrepreneurRoutes.myProfile(req, res);
@@ -79,7 +84,7 @@ module.exports = async (req, res) => {
       if (method === 'PUT' && segments[2] === 'verify') return entrepreneurRoutes.verify(req, res, segments[1], body);
     }
 
-    // /api/schemes*
+    // /schemes*
     if (segments[0] === 'schemes') {
       if (method === 'GET' && segments.length === 1) return schemeRoutes.list(req, res, query);
       if (method === 'GET' && segments.length === 2) return schemeRoutes.getOne(req, res, segments[1]);
@@ -88,7 +93,7 @@ module.exports = async (req, res) => {
       if (method === 'DELETE' && segments.length === 2) return schemeRoutes.remove(req, res, segments[1]);
     }
 
-    // /api/admin/stats
+    // /admin/stats
     if (segments[0] === 'admin' && segments[1] === 'stats' && method === 'GET') {
       return adminRoutes.stats(req, res);
     }
